@@ -199,6 +199,28 @@ canvas#board{display:block;width:100%;height:100%;touch-action:none}
 .pnote{font-size:11.5px;color:var(--ink2);margin-top:6px;min-height:14px}
 @media (max-height:760px){#endSheet{padding:14px 14px 12px}#endSheet .stars svg{width:34px;height:34px}#endSheet .stars{margin:2px 0}#endSheet .big{font-size:40px;line-height:1.05}#endSheet h2{margin:2px 0}#endSheet p{margin:4px 0}
   .champs{margin:6px 0 4px;padding:7px 6px 5px}.champs h4{display:none}.seg{margin-bottom:4px}.pod{min-height:96px}.pc.p1 .blk{height:46px}.pc.p2 .blk{height:34px}.pc.p3 .blk{height:26px}.pnote:empty{display:none}.plist{margin-top:3px}}
+.btn2.raceb{border-color:rgba(255,59,48,.6);background:linear-gradient(135deg,rgba(255,59,48,.35),rgba(255,159,10,.22));font-weight:800}
+.rcode{font-family:var(--fnum);font-size:56px;font-weight:900;letter-spacing:10px;text-align:center;margin:2px 0 10px;background:linear-gradient(90deg,var(--yellow),var(--red));-webkit-background-clip:text;background-clip:text;color:transparent}
+.field.code{font-family:var(--fnum);font-size:26px;letter-spacing:8px;direction:ltr}
+.or{text-align:center;color:var(--ink2);font-size:13px;margin:12px 0 8px}
+.rerr{color:#ff6b62;font-size:13.5px;min-height:18px;margin:8px 0 0;text-align:center}
+.rplayers{display:flex;flex-direction:column;gap:6px;margin:6px 0 12px}
+.rp{display:flex;align-items:center;gap:8px;padding:8px 12px;border-radius:14px;background:rgba(255,255,255,.07);font-weight:700;font-size:15px}
+.rp .dot{width:9px;height:9px;border-radius:50%;background:var(--green);box-shadow:0 0 8px var(--green);flex:none}.rp.off .dot{background:#555;box-shadow:none}.rp.off{opacity:.55}
+.rp .tag{margin-inline-start:auto;font-size:11.5px;color:var(--ink2);font-weight:600}.rp.me{outline:1px solid rgba(255,204,0,.55)}
+.rlv{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin:6px 0 12px}
+.rlv button{font-family:var(--fnum);font-size:17px;font-weight:800;padding:10px 0;border-radius:12px;border:1px solid var(--stroke);background:rgba(255,255,255,.06);color:var(--ink);cursor:pointer}
+.rlv button[aria-pressed="true"]{background:rgba(var(--g1),.35);border-color:rgba(var(--g1),.9)}
+#rLobby .cta,#rLobby .btn2,#rJoinCard .cta,#rJoinCard .btn2{width:100%;margin-top:8px}
+.countbox{display:flex;flex-direction:column;align-items:center;gap:6px}
+.countn{font-family:var(--fnum);font-size:120px;font-weight:900;line-height:1;background:linear-gradient(180deg,#fff,var(--yellow));-webkit-background-clip:text;background-clip:text;color:transparent;animation:pop .9s ease-out both}
+.countl{font-size:16px;font-weight:700;color:var(--ink2)}
+@keyframes pop{0%{transform:scale(1.8);opacity:0}25%{transform:scale(1);opacity:1}100%{transform:scale(.9);opacity:.85}}
+.rticker{flex:none;display:flex;gap:5px;overflow:hidden;direction:rtl}
+.rticker .rt{flex:1;min-width:0;display:flex;align-items:center;gap:5px;padding:4px 8px;border-radius:12px;background:rgba(30,32,46,.8);border:1px solid rgba(255,255,255,.14);font-size:12px;font-weight:700;white-space:nowrap}
+.rticker .rt b{font-family:var(--fnum);color:var(--ink2)}.rticker .rt span{overflow:hidden;text-overflow:ellipsis}.rticker .rt i{font-style:normal;margin-inline-start:auto;font-family:var(--fnum);color:var(--yellow)}
+.rticker .rt.me{border-color:rgba(255,204,0,.7);background:rgba(255,204,0,.14)}.rticker .rt.done{opacity:.6}
+.rticker[hidden]{display:none!important}
 </style>
 
 <div class="aura" aria-hidden="true"><i></i><i></i><i></i></div>
@@ -221,6 +243,7 @@ canvas#board{display:block;width:100%;height:100%;touch-action:none}
       <button class="cta" id="bPlay">שחק</button>
       <button class="btn2" id="bLevels">כל השלבים</button>
       <button class="btn2 blue" id="bDaily">אתגר יומי</button>
+      <button class="btn2 raceb" id="bRace">מרוץ חי עם חברים</button>
       <button class="btn2" id="bScores">טבלת שיאים</button>
     </div>
     <div class="row">
@@ -239,6 +262,31 @@ canvas#board{display:block;width:100%;height:100%;touch-action:none}
     <div class="glass topbar"><button class="iconbtn back" aria-label="חזרה"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></button><h2>שלבים</h2><span class="small" id="starSum"></span></div>
     <div class="grid" id="lvlGrid"></div>
     <p class="note">כוכב אחד: חצי מהכדורים בבית. שניים: כולם בבית. שלושה: כולם בבית ועוד שליש מהזמן על השעון. כוכב אחד פותח את השלב הבא.</p>
+  </div>
+</section>
+
+<section class="screen-v scroll off" id="sRace">
+  <div class="col">
+    <div class="glass topbar"><button class="iconbtn" id="rBack" aria-label="חזרה"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></button><h2>מרוץ חי</h2></div>
+    <div class="glass card" id="rJoinCard">
+      <p class="note">כל אחד משחק בטלפון שלו. אחד יוצר חדר ומקבל מספר, השאר מצטרפים עם המספר. כולם מקבלים את אותו לוח ומתחילים יחד.</p>
+      <button class="cta" id="rCreate">צור חדר חדש</button>
+      <div class="or">או הצטרפו לחדר קיים</div>
+      <input class="field code" id="rCode" inputmode="numeric" pattern="[0-9]*" maxlength="4" placeholder="0000" autocomplete="off" aria-label="מספר חדר">
+      <button class="btn2" id="rJoin">הצטרף</button>
+      <p class="rerr" id="rErr" role="alert"></p>
+    </div>
+    <div class="glass card" id="rLobby" hidden>
+      <div class="small" style="text-align:center">מספר החדר</div>
+      <div class="rcode" id="rCodeBig" dir="ltr">----</div>
+      <button class="btn2 blue" id="rShare">שלחו את המספר לחברים</button>
+      <h3 style="margin-top:16px">מי בחדר</h3>
+      <div class="rplayers" id="rPlayers"></div>
+      <div id="rHostBox"><h3>בחרו שלב למרוץ</h3><div class="rlv" id="rLevels"></div><button class="cta" id="rStart">התחל מרוץ</button></div>
+      <p class="note" id="rWait" style="text-align:center">מחכים שהמארח יתחיל את המרוץ…</p>
+      <button class="btn2" id="rLeave">יציאה מהחדר</button>
+      <p class="rerr" id="rErr2" role="alert"></p>
+    </div>
   </div>
 </section>
 
@@ -273,6 +321,7 @@ canvas#board{display:block;width:100%;height:100%;touch-action:none}
     <div class="glass stat g"><b><svg class="gem" viewBox="0 0 20 20" aria-hidden="true"><path d="M5 3h10l4 5-9 10L1 8z" fill="#64d2ff"/><path d="M1 8h18M5 3l5 15 5-15M7 8l3-5 3 5" fill="none" stroke="#0a84ff" stroke-width="1.1" stroke-linejoin="round"/></svg><span id="cred">2</span></b><span>יהלומים</span></div>
     <div class="glass stat"><b id="homes">0/5</b><span>בבית</span></div>
   </div>
+  <div class="rticker" id="rTicker" hidden></div>
   <div class="tut" id="tut" hidden><span class="n" id="tutN">1</span><span id="tutTxt"></span></div>
   <div class="stage">
     <div class="board" id="boardBox">
@@ -300,6 +349,7 @@ canvas#board{display:block;width:100%;height:100%;touch-action:none}
     <h2>הפסקה</h2><p id="pauseInfo"></p>
     <div class="row" style="flex-direction:column;gap:8px"><button class="cta" id="bResume">המשך</button><button class="btn2" id="bRestart">התחל מחדש</button><button class="btn2" id="bQuit">לתפריט</button></div>
   </div></div>
+  <div class="ov" id="ovCount" hidden><div class="countbox"><div class="countl" id="countL">המרוץ מתחיל</div><div class="countn" id="countN">3</div></div></div>
   <div class="ov" id="ovEnd" hidden><div class="glass sheet" id="endSheet"></div></div>
 </section>
 
@@ -619,7 +669,7 @@ function addPlayer(name){const p={id:'p'+Date.now().toString(36),name:name.slice
 function starsOf(p){return p?Object.values(p.levels).reduce((a,l)=>a+(l.stars||0),0):0}
 function unlockedUpTo(p){if(!p)return 1;let n=1;for(let i=1;i<=LEVELS.length;i++){if(p.levels[i]&&p.levels[i].stars>0)n=i+1;}return Math.min(n,LEVELS.length);}
 
-const screens=['sHome','sLevels','sScores','sGame'];
+const screens=['sHome','sLevels','sScores','sGame','sRace'];
 function show(id){screens.forEach(s=>$(s).classList.toggle('off',s!==id));if(id!=='sGame'&&typeof applyAura==='function')applyAura(THEMES[0]);document.body.classList.toggle('playing',id==='sGame');if(id==='sHome')renderHome();if(id==='sLevels')renderLevels();if(id==='sScores')renderScores();if(id==='sGame')requestAnimationFrame(size);}
 document.querySelectorAll('.back').forEach(b=>b.onclick=()=>{click();show('sHome')});
 function renderHome(){const p=me();$('pName').textContent=p?p.name:'שחקן';$('pStats').textContent=p?starsOf(p)+' מתוך '+LEVELS.length*3+' כוכבים':'';
@@ -638,7 +688,7 @@ function renderScores(){renderWorldDaily();const k=dayKey();$('dailyTitle').text
   rowsA.forEach((r,i)=>{const tr=document.createElement('tr');if(r.p.id===DB.cur)tr.className='me';tr.innerHTML='<td>'+(i+1)+'</td><td></td><td>'+r.s+'</td><td>'+r.t.toLocaleString('en-US')+'</td>';tr.children[1].textContent=r.p.name;$('tAll').appendChild(tr);});}
 function openPlayers(force){const L=$('plist');L.innerHTML='';DB.players.forEach(p=>{const b=document.createElement('button');b.className='btn2';b.textContent=p.name+' · '+starsOf(p)+'★';if(p.id===DB.cur)b.style.borderColor='var(--yellow)';b.onclick=()=>{DB.cur=p.id;save();$('ovName').hidden=true;renderHome();};L.appendChild(b);});
   $('bCloseP').hidden=!!force;$('ovName').hidden=false;$('nameIn').value='';}
-$('bAddP').onclick=()=>{const v=$('nameIn').value.trim()||('שחקן '+(DB.players.length+1));addPlayer(v);$('ovName').hidden=true;renderHome();};
+$('bAddP').onclick=()=>{const v=$('nameIn').value.trim()||('שחקן '+(DB.players.length+1));addPlayer(v);$('ovName').hidden=true;renderHome();if(pendingRoom!==null&&pendingRoom!==undefined){const r=pendingRoom;pendingRoom=null;openRace(r||undefined);}};
 $('nameIn').addEventListener('keydown',e=>{if(e.key==='Enter')$('bAddP').click()});
 $('bCloseP').onclick=()=>{$('ovName').hidden=true};
 $('switchP').onclick=()=>{click();openPlayers(false)};
@@ -690,7 +740,9 @@ let hapLabel=null;
 function iosTick(){try{if(!hapLabel){hapLabel=document.createElement('label');hapLabel.setAttribute('aria-hidden','true');hapLabel.style.cssText='position:fixed;left:-100px;top:0;width:1px;height:1px;opacity:0;pointer-events:none';
   const i=document.createElement('input');i.type='checkbox';i.setAttribute('switch','');i.tabIndex=-1;hapLabel.appendChild(i);document.body.appendChild(hapLabel);}hapLabel.click();}catch(e){}}
 const canVibrate=typeof navigator.vibrate==='function';
-function buzz(p){if(!vib)return;if(canVibrate){try{if(navigator.vibrate(p))return}catch(e){}}
+// Android vibration motors ignore very short pulses, so every pulse is stretched to at least ~30ms and made a bit stronger.
+const VMIN=30,VK=1.5;
+function buzz(p){if(!vib)return;if(canVibrate){const q=(Array.isArray(p)?p:[p]).map((v,i)=>i%2===0?Math.round(Math.max(VMIN,v*VK)):v);try{if(navigator.vibrate(q.length===1?q[0]:q))return}catch(e){}}
   const arr=Array.isArray(p)?p:[p];let t=0;for(let i=0;i<arr.length;i+=2){setTimeout(iosTick,t);t+=(arr[i]||0)+(arr[i+1]||0);}}
 let shakeAmt=0;function shake(a){shakeAmt=Math.max(shakeAmt,a||6);}
 
@@ -754,6 +806,91 @@ function renderWorldDaily(){const t=$('tWorld');if(!t)return;t.innerHTML='<tr><t
   sb('rpc/top_scores',{lvl:'D'+dayKey(),lim:10}).then(rows=>{t.innerHTML='<tr><th>#</th><th>שחקן</th><th>ניקוד</th></tr>'+(rows&&rows.length?'':'<tr><td colspan="3" class="small">עוד אף אחד לא שיחק היום. תהיו הראשונים!</td></tr>');
     (rows||[]).forEach((r,i)=>{const tr=document.createElement('tr');const p=me();if(p&&r.name===p.name&&DB.device.slice(-4)===r.device_tail)tr.className='me';tr.innerHTML='<td>'+(i+1)+'</td><td></td><td></td>';tr.children[1].textContent=r.name;tr.children[2].textContent=Number(r.score).toLocaleString('en-US');t.appendChild(tr);});})
   .catch(()=>{t.innerHTML='<tr><td class="small">טבלת העולם לא זמינה כרגע.</td></tr>';});}
+
+// ---- Live race: rooms with a 4-digit number. Every phone polls the room (~1.3s) and reports its own score. ----
+let race=null;const myTail=()=>DB.device.slice(-6);
+const urlRoom=(()=>{try{const m=/[?&]room=(\d{4})/.exec(location.search);return m?m[1]:null}catch(e){return null}})();
+let pendingRoom=urlRoom;
+function rpc(fn,args){const ctl=window.AbortController?new AbortController():null;const tm=setTimeout(()=>ctl&&ctl.abort(),7000);
+  return fetch(SB_URL+'/rest/v1/rpc/'+fn,{method:'POST',headers:{apikey:SB_KEY,'Content-Type':'application/json'},body:JSON.stringify(args),signal:ctl?ctl.signal:undefined})
+    .then(async r=>{clearTimeout(tm);const j=await r.json().catch(()=>null);if(!r.ok)throw new Error((j&&j.message)||('http '+r.status));return j;});}
+function raceErr(e){const m=String(e&&e.message||e);return /no room/.test(m)?'לא מצאנו חדר עם המספר הזה. בדקו את המספר.':/room full/.test(m)?'החדר מלא (עד 9 שחקנים).':/rate/.test(m)?'יותר מדי ניסיונות. חכו כמה דקות.':'אין חיבור כרגע. בדקו את האינטרנט ונסו שוב.';}
+function openRace(code){if(!me()){pendingRoom=code||pendingRoom||'';openPlayers(true);return;}
+  show('sRace');$('rErr').textContent='';$('rErr2').textContent='';
+  if(race){raceLobbyView();return;}
+  $('rJoinCard').hidden=false;$('rLobby').hidden=true;if(code){$('rCode').value=code;raceJoin(code);}}
+function raceLobbyView(){$('rJoinCard').hidden=true;$('rLobby').hidden=false;$('rCodeBig').textContent=race.code;renderRaceLevels();if(race.state)raceRenderLobby(race.state);}
+function renderRaceLevels(){const g=$('rLevels');if(g.childElementCount)return;for(let i=1;i<=LEVELS.length;i++){const b=document.createElement('button');b.textContent=i;b.title=LEVELS[i-1].name;b.onclick=()=>{click();race.level=i;[...g.children].forEach((x,k)=>x.setAttribute('aria-pressed',k===i-1));};g.appendChild(b);}
+  [...g.children].forEach((x,k)=>x.setAttribute('aria-pressed',k===(race.level||1)-1));}
+function raceBegin(st){race={code:st.room.code,level:race&&race.level||1,played:st.room.round,state:st,offset:Date.parse(st.now)-Date.now(),timer:null,busy:false};
+  try{history.replaceState(null,'','?room='+race.code)}catch(e){}
+  raceLobbyView();racePoll();}
+$('rCreate').onclick=()=>{click();const b=$('rCreate');b.disabled=true;$('rErr').textContent='';
+  rpc('race_create',{p_device:DB.device,p_name:me().name}).then(st=>{raceBegin(st);toast('החדר מוכן! שלחו את המספר')}).catch(e=>{$('rErr').textContent=raceErr(e)}).finally(()=>{b.disabled=false});};
+function raceJoin(code){code=String(code||'').replace(/\D/g,'');if(code.length!==4){$('rErr').textContent='מספר חדר הוא 4 ספרות.';return;}
+  $('rJoin').disabled=true;$('rErr').textContent='';
+  rpc('race_join',{p_code:code,p_device:DB.device,p_name:me().name}).then(st=>{raceBegin(st);buzz([20,40,20]);}).catch(e=>{$('rErr').textContent=raceErr(e)}).finally(()=>{$('rJoin').disabled=false});}
+$('rJoin').onclick=()=>{click();raceJoin($('rCode').value)};
+$('rCode').addEventListener('keydown',e=>{if(e.key==='Enter')raceJoin($('rCode').value)});
+$('rCode').addEventListener('input',e=>{const v=e.target.value.replace(/\D/g,'').slice(0,4);if(v!==e.target.value)e.target.value=v;if(v.length===4)raceJoin(v);});
+$('bRace').onclick=()=>{click();openRace()};
+$('rBack').onclick=()=>{click();if(race&&!confirm('לצאת מהחדר?'))return;raceLeave()};
+$('rLeave').onclick=()=>{click();raceLeave()};
+function raceLeave(){if(race){clearTimeout(race.timer);race=null;}$('rTicker').hidden=true;$('ovCount').hidden=true;try{history.replaceState(null,'',location.pathname)}catch(e){}show('sHome');}
+$('rShare').onclick=async()=>{click();const url=(location.protocol==='https:'&&!/claude|anthropic/.test(location.host)?location.origin:'https://stretch-it-three.vercel.app')+'/?room='+race.code;
+  const text='בואו למרוץ ב-Stretch It! מספר החדר: '+race.code+'\n'+url;
+  try{if(navigator.share){await navigator.share({text});return;}}catch(e){if(e&&e.name==='AbortError')return;}
+  try{await navigator.clipboard.writeText(text);toast('ההזמנה הועתקה. הדביקו בוואטסאפ');}catch(e){toast('מספר החדר: '+race.code);}};
+$('rStart').onclick=()=>{click();const b=$('rStart');b.disabled=true;$('rErr2').textContent='';
+  rpc('race_start',{p_code:race.code,p_device:DB.device,p_level:race.level||1}).then(st=>raceHandle(st)).catch(e=>{$('rErr2').textContent=raceErr(e)}).finally(()=>{b.disabled=false});};
+function raceIsHost(){return race&&race.state&&race.state.room&&race.state.room.host===myTail();}
+function raceRenderLobby(st){const L=$('rPlayers');L.textContent='';
+  (st.players||[]).slice().sort((a,b)=>Date.parse(a.joined_at)-Date.parse(b.joined_at)).forEach(p=>{const d=document.createElement('div');d.className='rp'+(p.online?'':' off')+(p.id===myTail()?' me':'');
+    const dot=document.createElement('i');dot.className='dot';const n=document.createElement('span');n.textContent=p.name;const t=document.createElement('span');t.className='tag';
+    t.textContent=[p.id===st.room.host?'מארח':'',p.id===myTail()?'אתם':'',p.online?'':'לא מחובר'].filter(Boolean).join(' · ');d.append(dot,n,t);L.appendChild(d);});
+  const host=raceIsHost();$('rHostBox').hidden=!host;$('rWait').hidden=host;
+  if(host)$('rStart').textContent=(st.players||[]).length<2?'התחל מרוץ (מחכים לחברים…)':'התחל מרוץ · '+st.players.length+' שחקנים';}
+// one loop: heartbeat + my live score; reacts to a new round started by the host
+function racePoll(){if(!race)return;clearTimeout(race.timer);
+  const inRound=cfg.race&&race.played===(race.state&&race.state.room.round)&&(running||ended);
+  const args={p_code:race.code,p_device:DB.device,p_round:inRound?race.played:-1,p_score:inRound?score:0,p_homes:inRound?homes:0,p_done:inRound?ended:false};
+  rpc('race_report',args).then(st=>{if(race)raceHandle(st)}).catch(()=>{}).finally(()=>{if(race)race.timer=setTimeout(racePoll,running?1300:1500)});}
+function raceHandle(st){if(!race||!st||!st.room){if(race&&st&&!st.room){$('rErr2').textContent='החדר נסגר.';}return;}
+  race.state=st;race.offset=Date.parse(st.now)-Date.now();
+  if(!$('sRace').classList.contains('off'))raceRenderLobby(st);
+  if(st.room.state==='countdown'&&st.room.round>race.played)raceStartRound(st.room);
+  if(cfg.race&&race.played===st.room.round){raceTicker(st);if(ended)raceRenderEnd(st);}}
+function raceStartRound(room){race.played=room.round;raceRenderEnd.won=false;$('ovEnd').hidden=true;$('ovPause').hidden=true;const L=LEVELS[room.level-1];
+  const c=Object.assign({},L,{seed:room.seed,itemSeed:room.seed+7,race:true,name:'מרוץ · '+L.name,tip:''});
+  startCfg(c,room.level-1);$('ovStart').hidden=true;$('rTicker').hidden=false;raceTicker(race.state);
+  const startAt=Date.parse(room.start_at)-race.offset;let last=-1;$('ovCount').hidden=false;$('countL').textContent='מרוץ · שלב '+room.level+' · '+L.name;
+  const tickC=()=>{if(!race||!cfg.race)return;const left=(startAt-Date.now())/1000;
+    if(left<=0){$('ovCount').hidden=true;go();buzz([80,40,120]);tone(1046,.25,'square',.06);return;}
+    const n=Math.ceil(left);if(n!==last&&n<=3){last=n;const el=$('countN');el.textContent=n;el.style.animation='none';void el.offsetWidth;el.style.animation='';audio();tone(660,.12,'square',.05);buzz(50);}
+    else if(n>3&&last===-1){$('countN').textContent=n;}
+    setTimeout(tickC,50);};
+  tickC();}
+function raceTicker(st){const t=$('rTicker');if(t.hidden)return;t.textContent='';
+  const rows=(st.players||[]).map(p=>p.id===myTail()?Object.assign({},p,{score:Math.max(p.score,score),homes:Math.max(p.homes,homes)}):p).sort((a,b)=>b.score-a.score).slice(0,4);
+  rows.forEach((p,i)=>{const d=document.createElement('div');d.className='rt'+(p.id===myTail()?' me':'')+(p.done?' done':'');
+    const b=document.createElement('b');b.textContent=i+1;const n=document.createElement('span');n.textContent=p.name;const s2=document.createElement('i');s2.textContent=p.score>=1000?(p.score/1000).toFixed(1)+'K':String(p.score||0);d.append(b,n,s2);t.appendChild(d);});}
+function raceEnd(){let bonus=0;if(homes===cfg.balls){bonus=Math.round(timeLeft)*25;score+=bonus;}
+  $('rTicker').hidden=true;buzz([60,60,120]);
+  $('endSheet').innerHTML='<div class="logo" dir="ltr" style="justify-content:center"><span class="wm1" style="font-size:22px">Stretch</span><span class="w2" style="font-size:10px;padding:3px 5px 2px">IT</span></div>'+
+    '<h2 id="eTitle">סיימתם!</h2><div class="big" dir="ltr">'+score.toLocaleString('en-US')+'</div><p id="eLine"></p>'+
+    '<div class="champs" id="champs"><h4>פודיום המרוץ</h4><div id="podium"></div></div>'+
+    '<div class="row" style="flex-direction:column;gap:8px"><button class="cta" id="eRaceNext">חזרה לחדר</button><button class="btn2" id="eRaceLeave">יציאה מהמרוץ</button></div>';
+  $('eLine').textContent=homes+' מתוך '+cfg.balls+' בבית'+(bonus?' · בונוס זמן '+bonus.toLocaleString('en-US'):'');
+  $('ovEnd').hidden=false;
+  $('eRaceNext').onclick=()=>{click();cfg.race=false;$('ovEnd').hidden=true;show('sRace');raceLobbyView();};
+  $('eRaceLeave').onclick=()=>{click();cfg.race=false;raceLeave();};
+  if(race){raceRenderEnd(race.state);racePoll();}}
+function raceRenderEnd(st){if(!$('podium')||!$('eRaceNext'))return;const rows=(st.players||[]).map(p=>({name:p.name,score:p.id===myTail()?score:p.score,me:p.id===myTail(),done:p.done||p.id===myTail(),online:p.online})).sort((a,b)=>b.score-a.score);
+  const waiting=rows.filter(r=>!r.done&&r.online).length;const myPos=rows.findIndex(r=>r.me)+1;
+  renderPodium($('podium'),rows,waiting?'מחכים ל-'+waiting+' שחקנים שעוד משחקים…':(myPos===1?'ניצחתם במרוץ!':'המקום שלכם: '+myPos));
+  $('eTitle').textContent=waiting?'סיימתם! מחכים לשאר…':(myPos===1?'ניצחתם! 🏆':'המרוץ הסתיים');
+  if(!waiting&&myPos===1&&!raceRenderEnd.won){raceRenderEnd.won=race&&race.played;burst(180,300,60,['#ffcc00','#ff3b30','#0a84ff','#fff'],320,1.4,300);[784,988,1318,1568].forEach((f,i)=>setTimeout(()=>tone(f,.2,'sine',.08),i*90));buzz([40,40,40,40,160]);}
+  $('eRaceNext').textContent=raceIsHost()?'מרוץ נוסף':'חזרה לחדר';}
 function startLevel(i){startCfg(LEVELS[i],i);}
 function startCfg(c,idx){if(!me()){openPlayers(true);return;}cfg=c;levelIdx=idx;
   world=buildWorld(c);applyTheme(themeFor(c,idx));TOTAL=c.time;timeLeft=TOTAL;mag=c.balls;score=0;combo=1;homes=0;lastBall=-9;trails.clear();parts.length=0;padHintAt=-99;
@@ -770,8 +907,8 @@ function startCfg(c,idx){if(!me()){openPlayers(true);return;}cfg=c;levelIdx=idx;
 function go(){audio();$('ovStart').hidden=true;running=true;world.motor=true;motor(true);tone(330,.18,'sine',.08,660);buzz(30);if(cfg.wind)setTimeout(()=>toast('רוח צד!'),600);tutStart();}
 function pause(on){if(ended||!running)return;paused=on;$('ovPause').hidden=!on;world.motor=!on;motor(!on);if(on){stopSpring();charging=false;push.classList.remove('down');$('pauseInfo').textContent=(cfg.daily?'אתגר יומי':'שלב '+(levelIdx+1))+' · עוד '+Math.ceil(timeLeft)+' שניות';}}
 $('pauseBtn').onclick=()=>{click();pause(true)};$('bResume').onclick=()=>{click();pause(false)};
-$('bRestart').onclick=()=>{click();motor(false);running=false;startCfg(cfg,levelIdx)};
-$('bQuit').onclick=()=>{click();motor(false);running=false;paused=false;$('ovPause').hidden=true;show('sHome')};
+$('bRestart').onclick=()=>{click();if(cfg.race){toast('במרוץ אי אפשר להתחיל מחדש');return;}motor(false);running=false;startCfg(cfg,levelIdx)};
+$('bQuit').onclick=()=>{click();motor(false);running=false;paused=false;$('ovPause').hidden=true;if(cfg.race){cfg.race=false;raceLeave();return;}show('sHome')};
 document.addEventListener('visibilitychange',()=>{if(!document.hidden)return;if(running&&!paused)pause(true);stopSpring();
   // Leaving the app: release audio so the phone does not keep a silent track playing in the background. The next tap brings it back.
   if(keepAlive){try{keepAlive.pause()}catch(e){}keepAlive=null;}if(ac&&ac.state==='running'){try{ac.suspend()}catch(e){}}});
@@ -779,6 +916,7 @@ document.addEventListener('visibilitychange',()=>{if(!document.hidden)return;if(
 function starsFor(){let s=0;if(homes>=Math.ceil(cfg.balls/2))s=1;if(homes>=cfg.balls)s=2;if(s===2&&timeLeft>=cfg.time*0.3)s=3;return s;}
 function end(){
   if(ended)return;ended=true;running=false;world.motor=false;motor(false);stopSpring();charging=false;push.classList.remove('down');
+  if(cfg.race){raceEnd();return;}
   let bonus=0;if(homes===cfg.balls){bonus=Math.round(timeLeft)*25;score+=bonus;}
   const st=starsFor(),p=me();let isBest=false;
   if(cfg.daily){const k=dayKey();isBest=score>(p.daily[k]||0);if(isBest)p.daily[k]=score;}
@@ -871,7 +1009,7 @@ function toolsUI(dt){if(running&&!paused)jumpCd=Math.max(0,jumpCd-dt);
 
 const TUT=[{k:'ball',el:'ballBtn',t:'לחצו על כדור כדי לשחרר את הכדור הראשון.'},{k:'climb',el:'pushBtn',t:'כשהכדור בגומה, החזיקו את דחוף ושחררו כשהמד בפס הירוק.'},{k:'jump',el:'tJump',t:'כדור על מדף? קפיצה מדלגת מעל חורים ואוספת יהלומים באוויר.'},{k:'home',el:'pushBtn',t:'ממשיכים להקפיץ עד הדגל. כל כדור בבית שווה 1,000 כפול הרצף.'}];
 let tutI=-1;
-function tutStart(){if(DB.tutDone||levelIdx!==0||cfg.daily){tutI=-1;tutShow();return;}tutI=0;tutShow();}
+function tutStart(){if(DB.tutDone||levelIdx!==0||cfg.daily||cfg.race){tutI=-1;tutShow();return;}tutI=0;tutShow();}
 function tutShow(){document.querySelectorAll('.pulse').forEach(e=>e.classList.remove('pulse'));const tg=$('sGame');if(tutI<0||tutI>=TUT.length){$('tut').hidden=true;tg.classList.remove('tutOn');return;}
   const s=TUT[tutI];$('tutN').textContent=tutI+1;$('tutTxt').textContent=s.t;$('tut').hidden=false;tg.classList.add('tutOn');$(s.el).classList.add('pulse');}
 function tutAdvance(k){if(tutI<0)return;if(TUT[tutI].k===k){tutI++;if(tutI>=TUT.length){tutI=-1;DB.tutDone=true;save();toast('אתם מוכנים!');}tutShow();}}
@@ -892,7 +1030,7 @@ function setSound(on){sound=on;DB.settings.sound=on;save();$('sndT').setAttribut
   $('spkOn').style.display=on?'':'none';$('spkOff').style.display=on?'none':'';$('spkBtn').setAttribute('aria-label',on?'השתק צליל':'הפעל צליל');
   if(!on){motor(false);stopSpring();if(keepAlive){try{keepAlive.pause()}catch(e){}keepAlive=null;}}else{if(ac){tone(880,.15,'sine',.1);if(running&&!paused)motor(true);}}}
 $('sndT').onclick=()=>{audio();setSound(!sound)};$('spkBtn').onclick=()=>{audio();setSound(!sound)};setSound(sound);
-$('vibT').onclick=function(){vib=!vib;DB.settings.vib=vib;save();this.setAttribute('aria-pressed',vib);if(vib)buzz(30);};$('vibT').setAttribute('aria-pressed',vib);
+$('vibT').onclick=function(){vib=!vib;DB.settings.vib=vib;save();this.setAttribute('aria-pressed',vib);if(vib){buzz([60,80,60,80,160]);toast(canVibrate?'הרגשתם? אם לא, בדקו שהרטט מופעל בהגדרות הטלפון':'באייפון הרטט עובד בזמן המשחק (iOS 18 ומעלה)');}};$('vibT').setAttribute('aria-pressed',vib);
 $('worldT').onclick=function(){click();DB.settings.world=!(DB.settings.world!==false);save();this.setAttribute('aria-pressed',DB.settings.world);toast(DB.settings.world?'הניקוד יישלח לטבלת העולם (שם וניקוד בלבד)':'הניקוד לא יישלח לטבלת העולם');};$('worldT').setAttribute('aria-pressed',DB.settings.world!==false);
 (function(){const lo=(PERF_LO-PMIN)/(PMAX-PMIN),hi=(PERF_HI-PMIN)/(PMAX-PMIN);const z=$('zone');z.style.right=(lo*100)+'%';z.style.width=((hi-lo)*100)+'%';})();
 
@@ -1095,7 +1233,7 @@ function tick(now){
   const dt=Math.max(0,Math.min(0.05,(now-last)/1000));last=now;
   const live=running&&!paused;
   if(charging){chargeT+=dt;const f=Math.min(1,chargeT/MAXHOLD);springLevel(f);$('brandMark').style.letterSpacing=(f*6-.6)+'px';coil(f);
-    if(chargeT>=nextTick){buzz(Math.round(6+14*f));nextTick=chargeT+(0.16-0.11*f);}$('fill').style.width=(f*100)+'%';$('pglow').style.transform='scaleX('+f+')';const pw=powerFromHold(chargeT);
+    if(chargeT>=nextTick){buzz(Math.round(6+14*f));nextTick=chargeT+(canVibrate?Math.max(.085,0.18-0.1*f):(0.16-0.11*f));}$('fill').style.width=(f*100)+'%';$('pglow').style.transform='scaleX('+f+')';const pw=powerFromHold(chargeT);
     $('powlab').textContent=pw<PERF_LO?'טוען…':pw<=PERF_HI?'עכשיו!':'חזק מדי';}
   else{$('brandMark').style.letterSpacing='';coil(0);$('fill').style.width='0%';$('pglow').style.transform='scaleX(0)';}
   updateTilt(dt);
@@ -1142,6 +1280,7 @@ async function runCoach(out,btn){const s=summary();if(!sample){out.textContent=l
 
 show('sHome');
 if(!me())openPlayers(true);
+else if(urlRoom){pendingRoom=null;openRace(urlRoom);}
 })();
 </script>
 <script>if('serviceWorker' in navigator){addEventListener('load',()=>navigator.serviceWorker.register('/sw.js').catch(()=>{}));}</script>
