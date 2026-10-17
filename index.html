@@ -73,7 +73,8 @@ button:focus-visible{outline:3px solid var(--sky);outline-offset:3px}
 .chip[aria-pressed="true"]{border-color:rgba(255,204,0,.55)}
 .topbar{display:flex;align-items:center;gap:10px;padding:8px 10px}
 .topbar h2{flex:1;margin:0;font-size:20px;font-weight:900}
-.iconbtn{width:42px;height:42px;border-radius:50%;border:1px solid var(--stroke);background:var(--glass-hi);color:var(--ink);display:grid;place-items:center;cursor:pointer;flex:none}
+.iconbtn::after{content:'';position:absolute;inset:-6px}
+.iconbtn{position:relative;width:42px;height:42px;border-radius:50%;border:1px solid var(--stroke);background:var(--glass-hi);color:var(--ink);display:grid;place-items:center;cursor:pointer;flex:none}
 .iconbtn svg{width:19px;height:19px}
 .iconbtn.off{color:var(--ink2);background:rgba(255,255,255,.05)}
 .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(96px,1fr));gap:10px}
@@ -166,6 +167,9 @@ canvas#board{display:block;width:100%;height:100%;touch-action:none}
   .stat{padding:3px 4px 2px;border-radius:12px}.stat b{font-size:15px}.stat span{font-size:9.5px}
   .tools{padding:5px;gap:5px}.tool{padding:5px 2px 4px;border-radius:13px}.tool b{font-size:13px}.tool small{font-size:10px}
   .controls{grid-template-columns:62px 1fr;gap:10px;padding:7px;border-radius:22px}.ballbtn{width:62px;height:62px;font-size:13px}.push{height:58px;font-size:23px;border-radius:18px}.pushcol{gap:5px}.mlab{font-size:10px}}
+/* Small phones in Safari (e.g. iPhone SE, ~550px visible): squeeze the chrome so the board gets the space. */
+@media (max-height:600px){.game .ghead .lvlname{display:none!important}.game .mlab{display:none}.game .tool{padding:3px 2px}.game .tool small{font-size:9px}.game .tools{padding:4px}
+  .game .controls{padding:6px;gap:8px;grid-template-columns:50px 1fr}.game .ballbtn{width:50px;height:50px;font-size:12px}.game .push{height:46px;font-size:21px}.game .stat{padding:2px 4px 1px}}
 @media (max-height:640px){.ghead .lvlname{display:none}.stat span{display:none}.controls{grid-template-columns:56px 1fr}.ballbtn{width:56px;height:56px}.push{height:52px}}
 </style>
 
@@ -549,14 +553,14 @@ if (typeof module !== 'undefined') module.exports = { windAt, mulberry, hop, bui
 (function(){
 const $=id=>document.getElementById(id);
 const cv=$('board');let ctx=cv.getContext('2d');
-const MAXHOLD=0.8, PMIN=380, PMAX=880, PERF_LO=520, PERF_HI=660;
+const MAXHOLD=0.8, PMIN=380, PMAX=880, PERF_LO=580, PERF_HI=720;
 const STAR_SVG='<svg viewBox="0 0 24 24"><path d="M12 2.6l2.9 5.9 6.5.9-4.7 4.6 1.1 6.5L12 17.4l-5.8 3.1 1.1-6.5L2.6 9.4l6.5-.9z" fill="#ffcc00" stroke="#ffe066" stroke-width=".8" stroke-linejoin="round"/></svg>';
 
 const LEVELS=[
   {name:'חימום',balls:3,time:90,doors:[],paddles:[],gate:false,tip:'בלי מלכודות. לומדים למתוח ולהקפיץ.'},
   {name:'דלתות ראשונות',balls:3,time:90,doors:[1,2],paddles:[],gate:false,speed:.8,tip:'דלתות אדומות נפתחות בקומות 1 ו-2. קפיצה מדלגת מעליהן.'},
   {name:'ארבע קומות של דלתות',balls:4,time:100,doors:[1,2,3,4],paddles:[],gate:false,speed:.9,tip:'דלת בכל קומה. תזמון הוא הכל.'},
-  {name:'הזרועות מתעוררות',balls:4,time:100,doors:[1,2,3,4],paddles:[2,4],gate:false,tip:'זרועות מסתובבות דוחפות את הכדורים אחורה.'},
+  {name:'הזרועות מתעוררות',balls:4,time:100,doors:[1,2,3,4],paddles:[2,4],gate:false,tip:'זרועות מסתובבות דוחפות את הכדורים אחורה. קפצו מעליהן או הטו את הטלפון ברגע הנכון.'},
   {name:'המחסום',balls:5,time:110,tip:'בקומה 3 מחסום שעולה ויורד. כל המלכודות פעילות.'},
   {name:'הילוך גבוה',balls:5,time:110,speed:1.2,tip:'הכל זז מהר יותר.'},
   {name:'רוח צד',balls:5,time:110,speed:1.15,wind:150,tip:'רוח דוחפת את הכדורים לצדדים. הפלס למעלה מראה לאן.'},
@@ -570,7 +574,13 @@ function dailyCfg(){const k=dayKey();let h=2166136261;for(const c of k){h^=c.cha
 
 const SKEY='stretch-it-v2';
 let DB;try{DB=JSON.parse(localStorage.getItem(SKEY)||'null')}catch(e){DB=null}
-if(!DB)DB={players:[],cur:null,settings:{sound:true,vib:true},tutDone:false};
+// Repair whatever is saved, so damaged or older data never stops the app from opening.
+if(!DB||typeof DB!=='object')DB={};
+if(!Array.isArray(DB.players))DB.players=[];
+DB.players=DB.players.filter(p=>p&&typeof p==='object').map((p,i)=>({id:typeof p.id==='string'?p.id:'p'+i+'x',name:String(p.name||'שחקן').slice(0,14),levels:(p.levels&&typeof p.levels==='object')?p.levels:{},daily:(p.daily&&typeof p.daily==='object')?p.daily:{}}));
+if(!DB.settings||typeof DB.settings!=='object')DB.settings={sound:true,vib:true};
+if(!DB.players.some(p=>p.id===DB.cur))DB.cur=DB.players.length?DB.players[0].id:null;
+DB.tutDone=!!DB.tutDone;
 function save(){try{localStorage.setItem(SKEY,JSON.stringify(DB))}catch(e){}}
 function me(){return DB.players.find(p=>p.id===DB.cur)||null}
 function addPlayer(name){const p={id:'p'+Date.now().toString(36),name:name.slice(0,14),levels:{},daily:{}};DB.players.push(p);DB.cur=p.id;save();return p;}
@@ -669,9 +679,16 @@ function onEv(type,v){
   if(type==='home'){homes++;const pts=1000*combo;score+=pts;[784,988,1318].forEach((f,i)=>setTimeout(()=>tone(f,.25,'sine',.08),i*90));buzz([25,40,25,40,90]);shake(5);toast('הביתה!',false,'+'+pts.toLocaleString('en-US'));floatPts('+'+pts.toLocaleString('en-US'),300,LV[5]-40);
     burst(320,LV[5]+25,40,['#ffcc00','#0a84ff','#ff3b30','#ffffff'],260,1.1,420);tutAdvance('home');}
 }
+let padHintAt=-99;
+// A ball that keeps getting knocked back by the same arm needs the player to act (jump or tilt). Tell them once in a while.
+function paddleHint(){for(const b of world.balls){if(b.state!=='live')continue;
+  const pd=world.paddles.find(p=>Math.hypot(b.x-p.cx,b.y-p.cy)<p.len+R+4);const inZ=!!pd;
+  if(inZ&&!b.inPad){b.padIn=(b.padIn||[]).filter(t=>world.t-t<9);b.padIn.push(world.t);
+    if(b.padIn.length>=3&&world.t-padHintAt>14){padHintAt=world.t;b.padIn=[];toast('הזרוע חוסמת? קפצו מעליה!');$('tJump').classList.add('pulse');setTimeout(()=>{if(tutI<0||TUT[tutI].el!=='tJump')$('tJump').classList.remove('pulse')},2600);}}
+  b.inPad=inZ;}}
 function startLevel(i){startCfg(LEVELS[i],i);}
 function startCfg(c,idx){if(!me()){openPlayers(true);return;}cfg=c;levelIdx=idx;
-  world=buildWorld(c);TOTAL=c.time;timeLeft=TOTAL;mag=c.balls;score=0;combo=1;homes=0;lastBall=-9;trails.clear();parts.length=0;
+  world=buildWorld(c);TOTAL=c.time;timeLeft=TOTAL;mag=c.balls;score=0;combo=1;homes=0;lastBall=-9;trails.clear();parts.length=0;padHintAt=-99;
   stats={presses:0,perfect:0,weak:0,strong:0,powers:[],climbs:0,maxCombo:1,falls:0,fallsAt:{},saves:0,jumps:0,items:{cherry:0,gem:0,star:0},tools:{bridge:0,shield:0,slow:0}};
   credits=2;items.length=0;itemCd=0;jumpCd=0;world.bridgeT=0;world.slowT=0;world.shield=0;itemRnd=c.itemSeed?mulberry(c.itemSeed):Math.random;for(let i=0;i<5;i++)spawnItem();
   running=false;paused=false;ended=false;prevDoor.length=0;prevGate.length=0;
@@ -687,7 +704,9 @@ function pause(on){if(ended||!running)return;paused=on;$('ovPause').hidden=!on;w
 $('pauseBtn').onclick=()=>{click();pause(true)};$('bResume').onclick=()=>{click();pause(false)};
 $('bRestart').onclick=()=>{click();motor(false);running=false;startCfg(cfg,levelIdx)};
 $('bQuit').onclick=()=>{click();motor(false);running=false;paused=false;$('ovPause').hidden=true;show('sHome')};
-document.addEventListener('visibilitychange',()=>{if(document.hidden&&running&&!paused)pause(true)});
+document.addEventListener('visibilitychange',()=>{if(!document.hidden)return;if(running&&!paused)pause(true);stopSpring();
+  // Leaving the app: release audio so the phone does not keep a silent track playing in the background. The next tap brings it back.
+  if(keepAlive){try{keepAlive.pause()}catch(e){}keepAlive=null;}if(ac&&ac.state==='running'){try{ac.suspend()}catch(e){}}});
 
 function starsFor(){let s=0;if(homes>=Math.ceil(cfg.balls/2))s=1;if(homes>=cfg.balls)s=2;if(s===2&&timeLeft>=cfg.time*0.3)s=3;return s;}
 function end(){
@@ -711,10 +730,11 @@ function end(){
   const svgs=$('stars').querySelectorAll('svg');svgs.forEach((s,i)=>{if(i<st)setTimeout(()=>{s.classList.add('got');tone(990+i*220,.18,'sine',.09);buzz(20);},350+i*320);});
   if(nextOk)$('eNext').onclick=()=>{click();startLevel(levelIdx+1)};
   $('eAgain').onclick=()=>{click();startCfg(cfg,levelIdx)};$('eMenu').onclick=()=>{click();show('sHome')};
-  $('eShare').onclick=()=>{click();shareCard(st)};$('eTips').onclick=()=>{click();runCoach($('eCoach'),$('eTips'))};
+  prepShare(st);$('eShare').onclick=()=>{click();shareCard(st)};$('eTips').onclick=()=>{click();runCoach($('eCoach'),$('eTips'))};
   if(st===3)burst(180,300,60,['#ffcc00','#ff3b30','#0a84ff','#fff'],320,1.4,300);
 }
-function hud(){$('cred').textContent=credits;$('score').textContent=score.toLocaleString('en-US');$('combo').textContent='×'+combo;$('homes').textContent=homes+'/'+cfg.balls;$('mag').textContent=mag;$('ballBtn').disabled=mag<=0;}
+const hudLast={};function setT(id,v){if(hudLast[id]!==v){hudLast[id]=v;$(id).textContent=v;}}
+function hud(){setT('cred',String(credits));setT('score',score.toLocaleString('en-US'));setT('combo','×'+combo);setT('homes',homes+'/'+cfg.balls);setT('mag',String(mag));const dis=mag<=0;if(hudLast.dis!==dis){hudLast.dis=dis;$('ballBtn').disabled=dis;}}
 function releaseBall(){if(!running||paused||mag<=0||world.t-lastBall<0.45)return;mag--;lastBall=world.t;dropBall(world);const b=world.balls[world.balls.length-1];b.best=0;
   noise(.12,.25,3200,2);tone(500,.08,'sine',.06,900);buzz(12);hud();tutAdvance('ball');}
 function levelOf(b){let k=0;for(let i=0;i<LV.length;i++)if(b.y<LV[i]+45)k=i;return k;}
@@ -908,7 +928,12 @@ function ballRaw(x,y,s,glow){const r=R*s;
   ctx.strokeStyle='rgba(255,255,255,.25)';ctx.lineWidth=.6;ctx.beginPath();ctx.arc(x,y,Math.max(.1,r-.3),0,Math.PI*2);ctx.stroke();}
 function ringUpdate(){$('ringArc').setAttribute('stroke-dashoffset',(138.2*(1-timeLeft/TOTAL)).toFixed(2));$('tnum').textContent=Math.ceil(timeLeft);}
 
-async function shareCard(st){
+let shareBlob=null;
+// Safari only opens the share sheet close to the tap, so the image is drawn ahead of time when the end screen opens.
+function prepShare(st){shareBlob=null;try{cardCanvas(st).toBlob(b=>{shareBlob=b},'image/png')}catch(e){}}
+function shareText(){const url=shareUrl();return me().name+' השיג '+score.toLocaleString('en-US')+' נקודות ב-Stretch It ('+(cfg.daily?'אתגר יומי':'שלב '+(levelIdx+1))+'). תצליחו לנצח? '+url;}
+function shareUrl(){return (location.protocol==='https:'&&location.host&&!/claude|anthropic/.test(location.host))?location.origin:'https://stretch-it-three.vercel.app';}
+function cardCanvas(st){
   const c=document.createElement('canvas');c.width=1080;c.height=1350;const x=c.getContext('2d');
   const g=x.createLinearGradient(0,0,1080,1350);g.addColorStop(0,'#141a33');g.addColorStop(1,'#06070c');x.fillStyle=g;x.fillRect(0,0,1080,1350);
   [[880,180,520,'255,204,0',.35],[120,1150,560,'255,59,48',.32],[560,640,420,'10,132,255',.28]].forEach(([cx,cy,r,col,a])=>{const rg=x.createRadialGradient(cx,cy,0,cx,cy,r);rg.addColorStop(0,'rgba('+col+','+a+')');rg.addColorStop(1,'rgba('+col+',0)');x.fillStyle=rg;x.fillRect(0,0,1080,1350);});
@@ -922,10 +947,11 @@ async function shareCard(st){
   x.direction='ltr';const sg=x.createLinearGradient(260,0,820,0);sg.addColorStop(0,'#ffcc00');sg.addColorStop(1,'#ff3b30');x.fillStyle=sg;x.font='800 170px -apple-system,Heebo,sans-serif';x.fillText(score.toLocaleString('en-US'),540,900);
   x.direction='rtl';x.fillStyle='#f5f6fa';x.font='700 44px -apple-system,Heebo,sans-serif';x.fillText(homes+' מתוך '+cfg.balls+' כדורים בבית',540,985);
   x.fillStyle='rgba(235,238,245,.75)';x.font='600 38px -apple-system,Heebo,sans-serif';x.fillText('תצליחו לנצח אותי?',540,1090);
-  const url=(location.protocol==='https:'&&location.host&&!/claude|anthropic/.test(location.host))?location.origin:'https://stretch-it-three.vercel.app';
+  const url=shareUrl();
   x.direction='ltr';x.fillStyle='#64d2ff';x.font='700 40px -apple-system,Heebo,sans-serif';x.fillText(url.replace('https://',''),540,1260);
-  const text=me().name+' השיג '+score.toLocaleString('en-US')+' נקודות ב-Stretch It ('+(cfg.daily?'אתגר יומי':'שלב '+(levelIdx+1))+'). תצליחו לנצח? '+url;
-  try{const blob=await new Promise(r=>c.toBlob(r,'image/png'));const file=new File([blob],'stretch-it-score.png',{type:'image/png'});
+  return c;}
+async function shareCard(st){const text=shareText(),url=shareUrl();
+  try{const blob=shareBlob||await new Promise(r=>cardCanvas(st).toBlob(r,'image/png'));const file=new File([blob],'stretch-it-score.png',{type:'image/png'});
     if(navigator.canShare&&navigator.canShare({files:[file]})){await navigator.share({files:[file],text});return;}
     if(navigator.share){await navigator.share({text,url});return;}
   }catch(e){if(e&&e.name==='AbortError')return;}
@@ -948,7 +974,7 @@ function tick(now){
   if(!paused){let acc=dt;while(acc>1e-6){const h=Math.min(1/60,acc);step(world,h,onEv);acc-=h;}}
   if(live){timeLeft=Math.max(0,timeLeft-dt);
     const s=Math.ceil(timeLeft);if(s!==tickS){tickS=s;tone(s<=10?1600:1200,.03,'square',s<=10?.04:.018);if(s<=10&&s>0)buzz(8);}
-    creditClimbs(dt);collect(dt);hud();
+    creditClimbs(dt);collect(dt);paddleHint();hud();
     if(timeLeft<=0)end();else if(mag===0&&!world.balls.some(b=>b.state==='live'))end();}
   if(!$('sGame').classList.contains('off')){toolsUI(dt);drawBoard(paused?0:dt);ringUpdate();}
 }
@@ -965,7 +991,7 @@ function localCoach(s){
   let open;if(s.homes===s.balls)open=pick(['כל הכדורים בבית, '+s.score.toLocaleString('en-US')+' נקודות. משחק של מקצוענים.','מושלם: '+s.homes+' מתוך '+s.balls+'. המכונה נכנעה.']);
   else if(s.homes>=Math.ceil(s.balls/2))open=s.homes+' מתוך '+s.balls+' בבית. יפה, ונשארו עוד נקודות על השולחן.';else open='רק '+s.homes+' בבית הפעם. המכונה הזו מעצבנת בכוונה, הנה מה שהנתונים אומרים.';
   if(s.weak/presses>.3)tips.push('ב-'+s.weak+' לחיצות העוצמה הייתה חלשה. החזיקו את "דחוף" עוד רגע, עד הפס הירוק.');
-  else if(s.tooStrong/presses>.3)tips.push(s.tooStrong+' לחיצות היו חזקות מדי והכדורים השתוללו. שחררו ברגע שהפס הירוק נדלק.');
+  else if(s.tooStrong/presses>.3)tips.push(s.tooStrong+' לחיצות היו חזקות מדי ופספסו את בונוס המושלם (+50%). שחררו כשהמד בתוך הפס הירוק.');
   else if(s.perfect/presses>=.4)tips.push('ההקפצות מדויקות: '+s.perfect+' מושלמות מתוך '+s.presses+'.');else tips.push('רק '+s.perfect+' מתוך '+s.presses+' הקפצות היו מושלמות. כל מושלמת שווה 50% יותר.');
   const fl=Object.entries(s.fallsByFloor||{}).sort((a,b)=>b[1]-a[1]);
   if(s.falls>0&&fl.length)tips.push('נפלתם '+s.falls+' פעמים, הכי הרבה ב'+fl[0][0]+'. שם כדאי לקפוץ בדיוק כשהכדור מגיע לחור, או לקנות גשר.');else tips.push('אפס נפילות! הרצף נשמר וזה מה שמכפיל את הנקודות.');
