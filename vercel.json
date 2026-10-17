@@ -1,0 +1,6 @@
+{
+  "buildCommand": "node build.js",
+  "outputDirectory": "public",
+  "installCommand": "echo skip",
+  "framework": null
+}
